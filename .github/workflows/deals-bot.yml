@@ -5,7 +5,7 @@ on:
     types: [deals-check]
   workflow_dispatch:
   schedule:
-    - cron: '23 * * * *'
+    - cron: '*/5 * * * *'
 
 permissions:
   contents: write
