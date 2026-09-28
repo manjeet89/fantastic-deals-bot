@@ -1,15 +1,31 @@
 name: FanTastic Deals Bot
 
 on:
-  schedule:
-    - cron: '1/5 * * * *'
+  repository_dispatch:
+    types: [deals-check]
   workflow_dispatch:
+  schedule:
+    - cron: '23 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deals-bot
+  cancel-in-progress: true
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
+      - name: Log trigger
+        run: |
+          echo "Triggered by: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Payload: ${{ toJSON(github.event.client_payload) }}"
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -26,32 +42,23 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: node server.js
 
-
-
-# name: FanTastic Deals Bot
-
-# on:
-#   schedule:
-#     - cron: '2-59/5 * * * *'
-#   workflow_dispatch:
-
-# jobs:
-#   run-bot:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v4
-
-#       - name: Setup Node.js
-#         uses: actions/setup-node@v4
-#         with:
-#           node-version: 20
-
-#       - name: Install dependencies
-#         run: npm install
-
-#       - name: Run bot
-#         env:
-#           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-#         run: node server.js
+      - name: Commit updated posted.json
+        run: |
+          if git diff --quiet -- posted.json; then
+            echo "No new ASINs - nothing to commit."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add posted.json
+            git commit -m "chore: update posted.json [skip ci]"
+            for i in 1 2 3; do
+              if git push; then
+                echo "Pushed posted.json."
+                exit 0
+              fi
+              echo "Push attempt $i failed, rebasing and retrying..."
+              git pull --rebase origin main
+              sleep 5
+            done
+            echo "::warning::Could not push posted.json - next run may re-post recent ASINs."
+          fi
