@@ -784,9 +784,6 @@ function sleep(ms) {
 // AUTOMATIC RUN
 // ==========================================
 
-const RUN_INTERVAL = 5 * 60 * 1000; // 10 minutes
-
-
 async function runBot() {
 
   console.log('\n=================================');
@@ -800,20 +797,38 @@ async function runBot() {
   console.log('=================================\n');
 }
 
-
-// ==========================================
-// FIRST RUN
-// ==========================================
-
 runBot();
 
+// const RUN_INTERVAL = 5 * 60 * 1000; // 10 minutes
 
-// ==========================================
-// RUN EVERY 10 MINUTES
-// ==========================================
 
-setInterval(() => {
+// async function runBot() {
 
-  runBot();
+//   console.log('\n=================================');
+//   console.log('🤖 BOT RUN STARTED');
+//   console.log('=================================\n');
 
-}, RUN_INTERVAL);
+//   await getMessages();
+
+//   console.log('\n=================================');
+//   console.log('🤖 BOT RUN FINISHED');
+//   console.log('=================================\n');
+// }
+
+
+// // ==========================================
+// // FIRST RUN
+// // ==========================================
+
+// runBot();
+
+
+// // ==========================================
+// // RUN EVERY 10 MINUTES
+// // ==========================================
+
+// setInterval(() => {
+
+//   runBot();
+
+// }, RUN_INTERVAL);
